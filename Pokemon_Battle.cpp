@@ -15,12 +15,16 @@ const int POTION_STR = 50;
 const int MAX_HEALTH = 100;
 const int MAX_POTION = 2;
 const int CRITICAL_HIT = 3;
+const int CRITICAL_HIT_FACTOR = 5;
+const int RECOVER_FACTOR = 10;
+const int DEMOBILIZE_FACTOR = 3;
+const int MISS_FACTOR = 5;
 
 //**********************************************Pokemon Abstract Class*************************************************
 class Pokemon
 {
 public:
-	Pokemon(int health = MAX_HEALTH);
+	Pokemon(int health = MAX_HEALTH, bool conscious = true);
 	virtual void Greet() const = 0;
 	void Potion();
 	void DisplayHealth() const;
@@ -31,9 +35,10 @@ public:
 	virtual void move4(Pokemon& opponent);
 
 	int m_Health;
+	bool m_Conscious;
 };
 
-Pokemon::Pokemon(int health) : m_Health(health)
+Pokemon::Pokemon(int health, bool conscious) : m_Health(health), m_Conscious(conscious)
 {
 
 }
@@ -95,7 +100,7 @@ void Pikachu::Greet() const
 void Pikachu::move1(Pokemon& opponent)
 {
 	srand(time(0));
-	if (rand() % 5 == 0)
+	if (rand() % CRITICAL_HIT_FACTOR == 0)
 	{
 		cout << "Critical Hit from Pikachu!\n";
 		opponent.m_Health -= ELECTRIC_SHOCK_STR * CRITICAL_HIT;
@@ -104,12 +109,17 @@ void Pikachu::move1(Pokemon& opponent)
 	{
 		opponent.m_Health -= ELECTRIC_SHOCK_STR;
 	}
+	if (rand() % DEMOBILIZE_FACTOR == 0)
+	{
+		opponent.m_Conscious = false;
+		cout << "Pikachu has demobilized the opponent!\n";
+	}
 }
 
 void Pikachu::move2(Pokemon& opponent)
 {
 	srand(time(0));
-	if (rand() % 5 == 0)
+	if (rand() % CRITICAL_HIT_FACTOR == 0)
 	{
 		cout << "Critical Hit from Pikachu!\n";
 		opponent.m_Health -= ELECTRIC_WAVE_STR * CRITICAL_HIT;
@@ -123,7 +133,7 @@ void Pikachu::move2(Pokemon& opponent)
 void Pikachu::move3(Pokemon& opponent)
 {
 	srand(time(0));
-	if (rand() % 5 == 0)
+	if (rand() % CRITICAL_HIT_FACTOR == 0)
 	{
 		cout << "Critical Hit from Pikachu!\n";
 		opponent.m_Health -= THUNDER_SHOCK_STR * CRITICAL_HIT;
@@ -137,14 +147,21 @@ void Pikachu::move3(Pokemon& opponent)
 void Pikachu::move4(Pokemon& opponent)
 {
 	srand(time(0));
-	if (rand() % 5 == 0)
+	if (rand() % MISS_FACTOR != 0)
 	{
-		cout << "Critical Hit from Pikachu!\n";
-		opponent.m_Health -= THUNDER_STR*CRITICAL_HIT;
+		if (rand() % CRITICAL_HIT_FACTOR == 0)
+		{
+			cout << "Critical Hit from Pikachu!\n";
+			opponent.m_Health -= THUNDER_STR*CRITICAL_HIT;
+		}
+		else
+		{
+			opponent.m_Health -= THUNDER_STR;
+		}
 	}
 	else
 	{
-		opponent.m_Health -= THUNDER_STR;
+		cout << "Pikachu's Thunder missed...\n";
 	}
 }
 
@@ -173,7 +190,7 @@ void Bulbasaur::Greet() const
 void Bulbasaur::move1(Pokemon& opponent)
 {
 	srand(time(0));
-	if (rand() % 5 == 0)
+	if (rand() % CRITICAL_HIT_FACTOR == 0)
 	{
 		cout << "Critical Hit from Bulbasaur!\n";
 		opponent.m_Health -= VINE_WHIP_STR*CRITICAL_HIT;
@@ -182,12 +199,17 @@ void Bulbasaur::move1(Pokemon& opponent)
 	{
 		opponent.m_Health -= VINE_WHIP_STR;
 	}
+	if (rand() % DEMOBILIZE_FACTOR == 0)
+	{
+		opponent.m_Conscious = false;
+		cout << "Bulbasaur has demobilized the opponent!\n";
+	}
 }
 
 void Bulbasaur::move2(Pokemon& opponent)
 {
 	srand(time(0));
-	if (rand() % 5 == 0)
+	if (rand() % CRITICAL_HIT_FACTOR == 0)
 	{
 		cout << "Critical Hit from Bulbasaur!\n";
 		opponent.m_Health -= POISON_POWDER_STR * CRITICAL_HIT;
@@ -201,7 +223,7 @@ void Bulbasaur::move2(Pokemon& opponent)
 void Bulbasaur::move3(Pokemon& opponent)
 {
 	srand(time(0));
-	if (rand() % 5 == 0)
+	if (rand() % CRITICAL_HIT_FACTOR == 0)
 	{
 		cout << "Critical Hit from Bulbasaur!\n";
 		opponent.m_Health -= RAZOR_LEAF_STR * CRITICAL_HIT;
@@ -215,14 +237,21 @@ void Bulbasaur::move3(Pokemon& opponent)
 void Bulbasaur::move4(Pokemon& opponent)
 {
 	srand(time(0));
-	if (rand() % 5 == 0)
+	if (rand() % MISS_FACTOR != 0)
 	{
-		cout << "Critical Hit from Bulbasaur!\n";
-		opponent.m_Health -= SEED_BOMB_STR * CRITICAL_HIT;
+		if (rand() % CRITICAL_HIT_FACTOR == 0)
+		{
+			cout << "Critical Hit from Bulbasaur!\n";
+			opponent.m_Health -= SEED_BOMB_STR * CRITICAL_HIT;
+		}
+		else
+		{
+			opponent.m_Health -= SEED_BOMB_STR;
+		}
 	}
 	else
 	{
-		opponent.m_Health -= SEED_BOMB_STR;
+		cout << "Bulbasaur's Seed Bomb missed...\n";
 	}
 }
 
@@ -297,85 +326,110 @@ int main()
 			cout << "You have made an invalid move. Please select your move again: \n";
 			cin >> move;
 		}
-
-		switch (move)
+		if ((*Player1).m_Conscious)
 		{
-		case 1:
-		{
-			if (choice == 1)
+			switch (move)
 			{
-				cout << "Pikachu uses Electric Shock.\n\n";
-			}
-			else
-			{
-				cout << "Bulbasaur uses Vine Whip.\n\n";
-			}
-			(*Player1).move1(*Player2);
-			break;
-		}
-		case 2:
-		{
-			if (choice == 1)
-			{
-				cout << "Pikachu uses Electric Wave.\n\n";
-			}
-			else
-			{
-				cout << "Bulbasaur uses Poison Powder.\n\n";
-			}
-			(*Player1).move2(*Player2);
-			break;
-		}
-		case 3:
-		{
-			if (choice == 1)
-			{
-				cout << "Pikachu uses Thunder Shock.\n\n";
-			}
-			else
-			{
-				cout << "Bulbasaur uses Razor Leaf.\n\n";
-			}
-			(*Player1).move3(*Player2);
-			break;
-		}
-		case 4:
-		{
-			if (choice == 1)
-			{
-				cout << "Pikachu uses Thunder.\n\n";
-			}
-			else
-			{
-				cout << "Bulbasaur uses Seed Bomb.\n\n";
-			}
-			(*Player1).move4(*Player2);
-			break;
-		}
-		case 5:
-		{
-			if (potion_count_p1 > 0)
+			case 1:
 			{
 				if (choice == 1)
 				{
-					cout << "Pikachu uses Potion. Health replenished by 50 HP.\n\n";
+					cout << "Pikachu uses Electric Shock.\n\n";
 				}
 				else
 				{
-					cout << "Bulbasaur uses Potion. Health replenished by 50 HP.\n\n";
+					cout << "Bulbasaur uses Vine Whip.\n\n";
 				}
-				(*Player1).Potion();
+				(*Player1).move1(*Player2);
 				break;
+			}
+			case 2:
+			{
+				if (choice == 1)
+				{
+					cout << "Pikachu uses Electric Wave.\n\n";
+				}
+				else
+				{
+					cout << "Bulbasaur uses Poison Powder.\n\n";
+				}
+				(*Player1).move2(*Player2);
+				break;
+			}
+			case 3:
+			{
+				if (choice == 1)
+				{
+					cout << "Pikachu uses Thunder Shock.\n\n";
+				}
+				else
+				{
+					cout << "Bulbasaur uses Razor Leaf.\n\n";
+				}
+				(*Player1).move3(*Player2);
+				break;
+			}
+			case 4:
+			{
+				if (choice == 1)
+				{
+					cout << "Pikachu uses Thunder.\n\n";
+				}
+				else
+				{
+					cout << "Bulbasaur uses Seed Bomb.\n\n";
+				}
+				(*Player1).move4(*Player2);
+				break;
+			}
+			case 5:
+			{
+				if (potion_count_p1 > 0)
+				{
+					if (choice == 1)
+					{
+						cout << "Pikachu uses Potion. Health replenished by 50 HP.\n\n";
+					}
+					else
+					{
+						cout << "Bulbasaur uses Potion. Health replenished by 50 HP.\n\n";
+					}
+					(*Player1).Potion();
+					break;
+				}
+				else
+				{
+					cout << "You've run out of potion!.\n\n";
+					break;
+				}
+			}
+			}
+		}
+		else
+		{
+			if (choice == 1)
+			{
+				cout << "Sorry, your Pikachu is still unable to move. You miss a turn.\n";
+				srand(time(0));
+				if (rand() % RECOVER_FACTOR != 0)
+				{
+					(*Player1).m_Conscious = true;
+					cout << "Your Pikachu has recovered and is once again ready for battle!\n";
+				}
 			}
 			else
 			{
-				cout << "You've run out of potion!.\n\n";
-				break;
+				cout << "Sorry, your Bulbasaur is still unable to move. You miss a turn.\n";
+				srand(time(0));
+				if (rand() % RECOVER_FACTOR != 0)
+				{
+					(*Player1).m_Conscious = true;
+					cout << "Your Bulbasaur has recovered and is once again ready for battle!\n";
+				}
 			}
 		}
-		}
 
-		if (((*Player2).m_Health) > 0)
+		if (((*Player2).m_Health) > 0 && ((*Player2).m_Conscious))
 		{
 			cout << "You've made your move. Now, it's your opponent's turn!\n\n";
 
@@ -450,6 +504,29 @@ int main()
 					(*Player2).move4(*Player1);
 					break;
 				}
+				}
+			}
+		}
+		else if (!(*Player2).m_Conscious)
+		{
+			if (choice == 1)
+			{
+				cout << "Your opponent Bulbasaur is unable to move. Your opponent misses a turn.\n";
+				srand(time(0));
+				if (rand() % RECOVER_FACTOR != 0)
+				{
+					(*Player2).m_Conscious = true;
+					cout << "Bulbasaur has recovered and is once again ready for battle!\n";
+				}
+			}
+			else
+			{
+				cout << "Your opponent Pikachu is unable to move. Your opponent misses a turn.\n";
+				srand(time(0));
+				if (rand() % RECOVER_FACTOR != 0)
+				{
+					(*Player2).m_Conscious = true;
+					cout << "Pikachu has recovered and is once again ready for battle!\n";
 				}
 			}
 		}
