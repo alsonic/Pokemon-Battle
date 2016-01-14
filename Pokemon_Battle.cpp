@@ -558,12 +558,6 @@ int main()
 		}
 	}
 
-	//delete Player1;
-	//delete Player2;
-
-	//Player1 = 0;
-	//Player2 = 0;
-
     return 0;
 }
 
