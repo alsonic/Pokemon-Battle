@@ -395,6 +395,7 @@ int main()
 						cout << "Bulbasaur uses Potion. Health replenished by 50 HP.\n\n";
 					}
 					(*Player1).Potion();
+					potion_count_p1--;
 					break;
 				}
 				else
